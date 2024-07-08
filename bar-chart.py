@@ -1,40 +1,58 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
-def plot_avg_life_expectancy(file_path):
+def plot_life_expectancy_by_region(file_path, life_expectancy_col='Life_expectancy', region_col='Region', country_col='Country'):
+    
+    data = pd.read_csv(file_path)
 
-    df = pd.read_csv(file_path)
+    sns.set(style="whitegrid")
 
-    avg_life_expectancy = df.groupby('Country')['Life_expectancy'].mean().reset_index()
+    regions = data[region_col].unique()
 
-    plt.figure(figsize=(25, 16))
-    plt.bar(avg_life_expectancy['Country'], avg_life_expectancy['Life_expectancy'], color='skyblue')
-    plt.xlabel('Countries')
-    plt.ylabel('Average Life Expectancy')
-    plt.title('Average Life Expectancy across Different Countries')
-    plt.xticks(rotation=90)  
+    colors = sns.color_palette("husl", len(regions))
+    for i, region in enumerate(regions):
+        plt.figure(figsize=(12, 8))
+        region_data = data[data[region_col] == region]
+        sns.barplot(x=country_col, y=life_expectancy_col, data=region_data, palette=[colors[i]])
 
-    plt.tight_layout()
-    plt.show()
+        plt.xticks(rotation=90)
+        plt.xlabel('Country')
+        plt.ylabel('Life Expectancy')
+        plt.title(f'Life Expectancy in {region}')
+        plt.tight_layout()
+        plt.show()
 
-file_path = '/content/primary_dataset.csv'
-plot_avg_life_expectancy(file_path)
+plot_life_expectancy_by_region('/content/primary_dataset.csv')
 ##########################################
 
-def plot_avg_gdp_per_capita(file_path):
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-    df = pd.read_csv(file_path)
+def plot_columns_for_region(file_path, region_name='Middle East', region_col='Region', country_col='Country', columns=None):
+    if columns is None:
+        columns = ['Adult_mortality', 'Infant_deaths', 'GDP_per_capita', 
+                   'Population_mln', 'Alcohol_consumption', 'Incidents_HIV']
 
-    avg_gdp_per_capita = df.groupby('Country')['GDP_per_capita'].mean().reset_index()
+    data = pd.read_csv(file_path)
+    region_data = data[data[region_col] == region_name]
+    print(region_data.columns)
 
-    plt.figure(figsize=(25, 16))
-    plt.bar(avg_gdp_per_capita['Country'], avg_gdp_per_capita['GDP_per_capita'], color='orange')
-    plt.xlabel('Countries')
-    plt.ylabel('Average GDP per Capita')
-    plt.title('Average GDP per Capita across Different Countries')
-    plt.xticks(rotation=90)  # چرخش نام کشورها برای بهتر دیده شدن
+    sns.set(style="whitegrid")
 
-    plt.tight_layout()
-    plt.show()
+    for column in columns:
+        if column in region_data.columns:
+            plt.figure(figsize=(12, 8))
+            sns.barplot(x=country_col, y=column, data=region_data, palette='husl')
 
-plot_avg_gdp_per_capita(file_path)
+            plt.xticks(rotation=90)
+            plt.xlabel('Country')
+            plt.ylabel(column.replace('_', ' ').title())
+            plt.title(f'{column.replace("_", " ").title()} in {region_name}')
+            plt.tight_layout()
+            plt.show()
+        else:
+            print(f"Warning: Column '{column}' not found in the dataset for {region_name}.")
+
+plot_columns_for_region('/content/primary_dataset.csv')
